@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+pkill swaybg
+swaybg -o 'DP-2' -i "/home/bea/Documents/wallpaper.jpg" -m fill &
+swaybg -o 'DP-1' -i "/home/bea/Documents/wallpaper.jpg" -m fill &
