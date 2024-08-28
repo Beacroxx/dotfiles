@@ -1,0 +1,6 @@
+set $term kitty
+set $browser brave --enable-features=UseOzonePlatform --ozone-platform=wayland
+set $filemanager pcmanfm
+set $editor code
+set $launcher fuzzel
+set $exit $launcher

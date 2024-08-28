@@ -1,0 +1,50 @@
+list_geometry()
+{
+    swaymsg -t get_tree | jq -r '.. | try select(.'"$1"' and .pid) | "\(.rect.x),\(.rect.y)  \(.rect.width)x\(.rect.height)''"'
+}
+
+CHOICE=$1
+
+# Since the script errors out when a $CHOICE isn't supplied
+if [[ -z "$CHOICE" ]]; then
+  echo "Usage: $0 [fullscreen|region|focused|display|swappy]"
+  exit 1
+fi
+
+DIR=${SCREENSHOT_DIR:=$HOME/Screenshots}
+
+mkdir -p "$DIR"
+FOCUSED=$(list_geometry focused)
+TMPFILE=/tmp/sc.png
+TMPFILE2=/tmp/sc_.png
+FILENAME="${DIR/#\~/$HOME}/$(date +'%Y-%m-%d-%H%M%S_sway_screenshot.png')"
+GEOMETRY=$(list_geometry visible)
+
+case $CHOICE in
+    fullscreen) grim "$FILENAME" ;;
+    region)     grim -g "$(slurp)" "$FILENAME" ;;
+    focused)    grim -g "$FOCUSED" "$FILENAME" ;;
+    display)    grim -o "$(swaymsg -t get_outputs | jq -r '.[] | select(.focused) | .name')" "$FILENAME" ;;
+    swappy)
+        grim $TMPFILE
+        feh $TMPFILE &
+        PID=$!
+        FEH_WINDOW_ID=""
+        while [ -z "$FEH_WINDOW_ID" ]; do
+          FEH_WINDOW_ID=$(swaymsg -t get_tree | jq -r ".. | select(.pid? and .pid == $PID) | .id")
+        done
+        swaymsg "[con_id=$FEH_WINDOW_ID] fullscreen global"
+        REGION=$(echo "$GEOMETRY" | slurp -b '#11111b88' -c '#cba6f7ff' -B '#11111b88' -d | sed -E 's/^([0-9]+),([0-9]+) ([0-9]+)x([0-9]+)$/\3x\4+\1+\2/')
+        kill $PID
+        [ -z "$REGION" ] && exit 1
+        magick $TMPFILE -crop "$REGION" $TMPFILE2
+        swappy -f "$TMPFILE2" -o "$FILENAME"
+    ;;
+esac
+
+
+if [ "$CHOICE" != "" ]; then
+        wl-copy < "$FILENAME"
+        notify-send "Screenshot" "File saved as <i>'$FILENAME'</i> and copied to the clipboard." -i "$FILENAME"
+fi
+

@@ -1,0 +1,154 @@
+# The files we include below will be created / overwritten by nwg-shell tools
+#
+include variables
+include outputs
+include autostart
+include workspaces
+include keyboard
+include pointer
+include touchpad
+
+# nwg-shell sway config
+# Read `man 5 sway` for reference.
+
+# border
+default_border pixel 2
+
+client.focused          #cba6f7   #1e1e2e   #cdd6f4   #cba6f7    #cba6f7
+client.focused_inactive #181825   #1e1e2e   #cdd6f4   #181825    #181825
+client.unfocused        #181825   #1e1e2e   #cdd6f4   #181825    #181825
+client.urgent           #f38ba8   #1e1e2e   #cdd6f7   #f38ba8    #f38ba8
+client.placeholder      #15161e   #1a1b26   #c0caf5   #15161e    #15161e
+client.background       #1a1b26
+
+# gaps
+gaps inner 0
+gaps outer 0
+
+# font
+font pango:JetBrainsMono Nerd Font Mono 11
+
+# mod key used for most binds
+# Mod1 = Alt
+# Mod4 = Super
+set $Mod Mod4
+
+###############     Autostart      ##################
+
+exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
+exec hash dbus-update-activation-environment 2>/dev/null && \
+    dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
+exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+exec ~/.azotebg
+
+### Turn off screen on lid closed
+set $laptop eDP-1
+bindswitch lid:on output $laptop disable
+bindswitch lid:off output $laptop enable
+
+#############         Bindings           ##################
+workspace 2 output DP-2
+workspace 1 output DP-1
+
+# kill focused window
+bindsym $Mod+q kill
+bindsym Mod1+F4 kill
+
+# core applications
+bindsym $Mod+Return       exec $term
+bindsym $Mod+e            exec $filemanager
+bindsym $Mod+d            exec $launcher
+bindsym $Mod+l            exec nwg-lock
+
+# Exit sway (default way to log you out of your Wayland session)
+bindsym $Mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+
+# screenshot
+bindsym Print exec screenshot fullscreen
+bindsym $Mod+Shift+Print exec screenshot display
+bindsym $Mod+Shift+s exec screenshot swappy
+bindsym $Mod+Print exec screenshot focused
+
+# audio
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+bindsym XF86AudioStop exec playerctl stop
+bindsym XF86AudioMute exec pactl set-sink-mute 0 toggle
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume 0 +1%
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume 0 -1%
+
+# backlight
+bindsym XF86MonBrightnessUp exec light -A 5
+bindsym XF86MonBrightnessDown exec light -U 5
+
+# Reload the configuration file
+bindsym $Mod+Shift+c reload
+
+###########          Workspace Bindings          ###############
+
+# switch to workspace
+bindsym $Mod+1 workspace number 1
+bindsym $Mod+2 workspace number 2
+bindsym $Mod+3 workspace number 3
+bindsym $Mod+4 workspace number 4
+bindsym $Mod+5 workspace number 5
+bindsym $Mod+6 workspace number 6
+bindsym $Mod+7 workspace number 7
+bindsym $Mod+8 workspace number 8
+
+# switch to workspace - numpad alternatives
+bindsym $Mod+Mod2+KP_1 workspace number 1
+bindsym $Mod+Mod2+KP_2 workspace number 2
+bindsym $Mod+Mod2+KP_3 workspace number 3
+bindsym $Mod+Mod2+KP_4 workspace number 4
+bindsym $Mod+Mod2+KP_5 workspace number 5
+bindsym $Mod+Mod2+KP_6 workspace number 6
+bindsym $Mod+Mod2+KP_7 workspace number 7
+bindsym $Mod+Mod2+KP_8 workspace number 8
+
+# switch to next or previous workspace
+bindsym $Mod+Mod1+Left workspace prev
+bindsym $Mod+Mod1+Right workspace next
+
+# move focused container to workspace
+bindsym $Mod+Shift+1 move container to workspace number 1; workspace number 1
+bindsym $Mod+Shift+2 move container to workspace number 2; workspace number 2
+bindsym $Mod+Shift+3 move container to workspace number 3; workspace number 3
+bindsym $Mod+Shift+4 move container to workspace number 4; workspace number 4
+bindsym $Mod+Shift+5 move container to workspace number 5; workspace number 5
+bindsym $Mod+Shift+6 move container to workspace number 6; workspace number 6
+bindsym $Mod+Shift+7 move container to workspace number 7; workspace number 7
+bindsym $Mod+Shift+8 move container to workspace number 8; workspace number 8
+
+# move focused container to workspace - numpad alternatives
+bindsym $Mod+Shift+Mod2+KP_End   move container to workspace number 1; workspace number 1
+bindsym $Mod+Shift+Mod2+KP_Down  move container to workspace number 2; workspace number 2
+bindsym $Mod+Shift+Mod2+KP_Next  move container to workspace number 3; workspace number 3
+bindsym $Mod+Shift+Mod2+KP_Left  move container to workspace number 4; workspace number 4
+bindsym $Mod+Shift+Mod2+KP_Begin move container to workspace number 5; workspace number 5
+bindsym $Mod+Shift+Mod2+KP_Right move container to workspace number 6; workspace number 7
+bindsym $Mod+Shift+Mod2+KP_Home  move container to workspace number 7; workspace number 7
+bindsym $Mod+Shift+Mod2+KP_Up    move container to workspace number 8; workspace number 8
+
+############      Container/Window control  ############
+
+# Scratchpad, Floating
+bindsym $Mod+f floating toggle
+floating_modifier $Mod normal
+
+bindsym $Mod+F11 fullscreen toggle
+
+bar {
+     swaybar_command waybar
+}
+
+############    application settings   ############
+
+# focus, floating, & sticky
+for_window [app_id="(?i)(?:blueman-manager|azote|gnome-disks)"] floating enable
+for_window [app_id="(?i)(?:pavucontrol|nm-connection-editor|gsimplecal|galculator)"] floating enable
+for_window [app_id="(?i)(?:firefox|chromium)"] border none
+for_window [title="(?i)(?:copying|deleting|moving)"] floating enable
+
+popup_during_fullscreen smart
